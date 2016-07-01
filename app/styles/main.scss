@@ -94,4 +94,13 @@ body {
   .jumbotron {
     border-bottom: 0;
   }
+    
+.modal-dialog {
+  width: 90%;
+    max-width: inherit;
+}
+
+.modal-content {
+  height: auto;
+}    
 }
