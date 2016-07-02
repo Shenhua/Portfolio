@@ -54,6 +54,10 @@ module.exports = function (grunt) {
       styles: {
         files: ['<%= config.app %>/styles/{,*/}*.css'],
         tasks: ['newer:copy:styles', 'postcss']
+      },
+      projects: {
+        files: ['<%= config.app %>/*.html','<%= config.app %>/assets/projects/*.html'],
+        tasks: ['includes']  
       }
     },
 
@@ -68,14 +72,14 @@ module.exports = function (grunt) {
       livereload: {
         options: {
           files: [
-            '<%= config.app %>/{,*/}*.html',
+            '<%= config.dist %>/{,*/}*.html',
             '.tmp/styles/{,*/}*.css',
-            '<%= config.app %>/images/{,*/}*',
+            '<%= config.dist %>/images/{,*/}*',
             '.tmp/scripts/{,*/}*.js'
           ],
           port: 9000,
           server: {
-            baseDir: ['.tmp', config.app],
+            baseDir: ['.tmp', config.dist],
             routes: {
               '/bower_components': './bower_components'
             }
@@ -220,12 +224,12 @@ module.exports = function (grunt) {
     // Automatically inject Bower components into the HTML file
     wiredep: {
       app: {
-        src: ['<%= config.app %>/index.html'],
+        src: ['<%= config.dist %>/index.html'],
         exclude: ['bootstrap.js'],
         ignorePath: /^(\.\.\/)*\.\./
       },
       sass: {
-        src: ['<%= config.app %>/styles/{,*/}*.{scss,sass}'],
+        src: ['<%= config.dist %>/styles/{,*/}*.{scss,sass}'],
         ignorePath: /^(\.\.\/)+/
       }
     },
@@ -361,7 +365,22 @@ module.exports = function (grunt) {
         }]
       }
     },
-
+      
+    // include projects files in index page  
+    includes: {
+      build: {
+        cwd: '<%= config.app %>',
+        src: [ '*.html', 'assets/projects/*.html' ],
+        dest: '<%= config.dist %>',
+        options: {
+          debug: true,
+          flatten: true,
+          includePath: '<%= config.app %>/assets/projects/',
+          banner: '<!-- Site built using grunt includes! -->\n'
+        }
+      }
+    },
+      
     // Run some tasks in parallel to speed up build process
     concurrent: {
       server: [
@@ -380,7 +399,8 @@ module.exports = function (grunt) {
     }
   });
 
-
+  grunt.loadNpmTasks('grunt-includes');
+    
   grunt.registerTask('serve', 'start the server and preview your app', function (target) {
 
     if (target === 'dist') {
@@ -392,6 +412,7 @@ module.exports = function (grunt) {
       'wiredep',
       'concurrent:server',
       'postcss',
+      'includes',
       'browserSync:livereload',
       'watch'
     ]);
@@ -423,6 +444,7 @@ module.exports = function (grunt) {
     'useminPrepare',
     'concurrent:dist',
     'postcss',
+    'includes',
     'concat',
     'cssmin',
     'uglify',
